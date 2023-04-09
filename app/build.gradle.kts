@@ -1,14 +1,15 @@
+@file:Suppress("UnstableApiUsage")
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt")
-    id("kotlin-parcelize")
 }
 
 android {
+    namespace = "com.zhaoyingang.permission.sample"
     compileSdk = 33
     defaultConfig {
-        applicationId = "pub.devrel.easypermissions.sample"
+        applicationId = "com.zhaoyingang.permission.sample"
         minSdk = 14
         targetSdk = 33
         versionCode = 1
@@ -30,11 +31,21 @@ android {
         jvmTarget = "1.8"
         freeCompilerArgs = listOf("-Xcontext-receivers")
     }
+
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
-    implementation(project(":easypermissions"))
+    implementation(project(":xxpermissions-ktx"))
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.annotation:annotation:1.6.0")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.10")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.20")
+    
+    // Google Material Design
+    implementation("com.google.android.material:material:1.8.0")
+
+    // ViewBinding https://github.com/DylanCaiCoding/ViewBindingKTX
+    implementation("com.github.DylanCaiCoding.ViewBindingKTX:viewbinding-nonreflection-ktx:2.1.0")
 }

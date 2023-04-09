@@ -1,77 +1,12 @@
-# XXPermissions-ktx
+package com.zhaoyingang.permission.sample
 
-[![](https://img.shields.io/hexpm/l/plug)](http://www.apache.org/licenses/)
-[![](https://jitpack.io/v/Zhao-YinGang/XXPermissions-ktx.svg)](https://jitpack.io/#Zhao-YinGang/XXPermissions-ktx)
+import android.app.Activity
+import androidx.appcompat.app.AlertDialog
+import com.hjq.permissions.OnPermissionPageCallback
+import com.hjq.permissions.Permission
+import com.hjq.permissions.XXPermissions
+import com.zhaoyingang.permission.XXPermissionsKTX
 
-# 权限请求框架
-
-本框架是 [XXPermissions](https://github.com/getActivity/XXPermissions) 的 Kotlin 扩展库，让你在 Kotlin 中更轻松的申请权限。
-
-* 项目地址：[Github XXPermissions-ktx](https://github.com/Zhao-YinGang/XXPermissions-ktx)
-
-#### 集成步骤
-
-* 如果你的项目 Gradle 配置是在 `7.0` 以下，需要在 `build.gradle` 文件中加入
-
-```groovy
-allprojects {
-    repositories {
-        // JitPack 远程仓库：https://jitpack.io
-        maven { url 'https://jitpack.io' }
-    }
-}
-```
-
-* 如果你的 Gradle 配置是 `7.0` 及以上，则需要在 `settings.gradle.kts` 或 `settings.gradle` 文件中加入
-```kotlin
-dependencyResolutionManagement {
-    repositories {
-        // JitPack 远程仓库：https://jitpack.io
-        maven("https://jitpack.io")
-    }
-}
-```
-
-```groovy
-dependencyResolutionManagement {
-    repositories {
-        // JitPack 远程仓库：https://jitpack.io
-        maven { url 'https://jitpack.io' }
-    }
-}
-```
-
-* 配置完远程仓库后，在项目 app 模块下的 `build.gradle.kts` 或 `build.gradle` 文件中加入远程依赖
-
-```kotlin
-dependencies {
-    // 权限请求框架：https://github.com/getActivity/XXPermissions
-    implementation("com.github.getActivity:XXPermissions:16.8")
-
-    // XXPermissions-ktx https://github.com/Zhao-YinGang/XXPermissions-ktx
-    implementation("com.github.Zhao-YinGang:XXPermissions-ktx:V1.0.0-bate01")
-}
-```
-
-```groovy
-dependencies {
-    // 权限请求框架：https://github.com/getActivity/XXPermissions
-    implementation 'com.github.getActivity:XXPermissions:16.8'
-
-    // XXPermissions-ktx https://github.com/Zhao-YinGang/XXPermissions-ktx
-    implementation 'com.github.Zhao-YinGang:XXPermissions-ktx:V1.0.0-bate01'
-}
-```
-
-[XXPermissions-ktx](https://github.com/Zhao-YinGang/XXPermissions-ktx) 只兼容了 AndroidX，没有兼容 support，请在项目 gradle.properties 文件中加入
-```
-# 表示将第三方库迁移到 AndroidX
-android.enableJetifier = true
-```
-
-* Kotlin 用法示例
-
-```kotlin
 fun Activity.requestBleCameraLocationPermissions() {
     XXPermissionsKTX.with(this)
         // 申请BLE权限
@@ -160,6 +95,3 @@ fun mapPermissions(permissions: List<String>): List<String> {
     }
     return msgList
 }
-```
-
-* 更多关于 XXPermissions 的用法，请参考 [XXPermissions](https://github.com/getActivity/XXPermissions)

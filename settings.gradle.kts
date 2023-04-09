@@ -17,7 +17,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "EasierPermissions"
+rootProject.name = "XXPermissions-ktx"
 
 include(":app")
-include(":easypermissions")
+include(":xxpermissions-ktx")
