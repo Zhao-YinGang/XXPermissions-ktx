@@ -1,6 +1,6 @@
 # XXPermissions-ktx
 
-[![](https://img.shields.io/hexpm/l/plug)](http://www.apache.org/licenses/)
+[![](https://img.shields.io/hexpm/l/plug)](http://www.apache.org/licenses/LICENSE-2.0)
 [![](https://jitpack.io/v/Zhao-YinGang/XXPermissions-ktx.svg)](https://jitpack.io/#Zhao-YinGang/XXPermissions-ktx)
 
 # 权限请求框架
