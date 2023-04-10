@@ -17,19 +17,10 @@
 
 package com.zhaoyingang.permission
 
-/**
- * 需要展示申请原因的权限
- */
-interface RationalePermissions {
-    val rationaleList: List<String>     // 所有需要展示申请原因的权限
-    val onConsent: OnConsentCallback    // 展示申请原因后，如果用户同意，则调用此回调，否则申请流程直接结束不需要调用
-}
-
-fun interface OnShowRequestPermissionRationale {
+fun interface OnConsentCallback {
     /**
-     * 需要展示申请原因时回调
-     *
-     * @param rationale      需要展示申请原因的权限
+     * 1. 对于需要展示申请原因的权限，用户查看申请原因并同意后执行此回调，开始申请流程
+     * 2. 对于不再询问的权限，用户查看申请原因并同意后执行此回调，进入应用设置界面
      */
-    fun onShowRationale(rationale: RationalePermissions)
+    operator fun invoke()
 }

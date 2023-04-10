@@ -15,21 +15,11 @@
  *
  */
 
-package com.zhaoyingang.permission
+package com.zhaoyingang.permission.internal
 
-/**
- * 需要展示申请原因的权限
- */
-interface RationalePermissions {
-    val rationaleList: List<String>     // 所有需要展示申请原因的权限
-    val onConsent: OnConsentCallback    // 展示申请原因后，如果用户同意，则调用此回调，否则申请流程直接结束不需要调用
-}
+import com.zhaoyingang.permission.GrantedPermissions
 
-fun interface OnShowRequestPermissionRationale {
-    /**
-     * 需要展示申请原因时回调
-     *
-     * @param rationale      需要展示申请原因的权限
-     */
-    fun onShowRationale(rationale: RationalePermissions)
-}
+internal class GrantedPermissionsImpl(
+    override val grantedList: List<String>,
+    override val isAllGranted: Boolean,
+) : GrantedPermissions
