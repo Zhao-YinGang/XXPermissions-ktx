@@ -1,217 +1,246 @@
-# XXPermissions-ktx
+<h1 align="center">XXPermissions-ktx</h1>
+<p align="center">
+  <a href="http://www.apache.org/licenses/LICENSE-2.0">
+    <img src="https://img.shields.io/hexpm/l/plug?style=flat-square">
+  </a>
+  <a href="https://jitpack.io/#Zhao-YinGang/XXPermissions-ktx">
+    <img src="https://jitpack.io/v/Zhao-YinGang/XXPermissions-ktx.svg?style=flat-square">
+  </a>
+  <a href="https://github.com/RichardLitt/standard-readme">
+    <img src="https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square">
+  </a>
+</p>
 
-[![](https://img.shields.io/hexpm/l/plug)](http://www.apache.org/licenses/LICENSE-2.0)
-[![](https://jitpack.io/v/Zhao-YinGang/XXPermissions-ktx.svg)](https://jitpack.io/#Zhao-YinGang/XXPermissions-ktx)
+<p align="center">
+  <a href="/README.md">English</a> •
+  <a href="/docs/README-zh-cn.md">简体中文 (Simplified Chinese)</a>
+</p>
 
-# 权限请求框架
+**Library for Android runtime permissions**
 
-本框架是 [XXPermissions](https://github.com/getActivity/XXPermissions) 的 Kotlin 扩展库，让你在 Kotlin 中更轻松的申请权限。  
-本框架完全兼容 Java，在 Java 中也可以轻松使用。
-* 项目地址：[Github XXPermissions-ktx](https://github.com/Zhao-YinGang/XXPermissions-ktx)
+- [XXPermissions-ktx](https://github.com/Zhao-YinGang/XXPermissions-ktx) is the Kotlin extension library for [XXPermissions](https://github.com/getActivity/XXPermissions), Easily request permissions using Kotlin DSL.
+- Provide Java compatible chain calling, which can also be easily used in Java.
 
-## 集成步骤
+## Table of Contents
 
-* 如果你的项目 Gradle 配置是在 `7.0` 以下，需要在 `build.gradle` 文件中加入
+- [Integration steps](#integration-steps)
+- [Usage](#usage)
+- [Example](#example)
+- [Related Efforts](#related-efforts)
+- [Maintainers](#maintainers)
+- [Contributing](#contributing)
+- [License](#license)
 
-```groovy
+## Integration steps
+
+### Add [JitPack](https://jitpack.io/) package repository
+
+* If your Gradle version is below `7.0`, add JitPack in your root `build.gradle.kts` or `build.gradle` at the end of repositories:
+
+```kotlin
+// build.gradle.kts
 allprojects {
     repositories {
-        // JitPack 远程仓库：https://jitpack.io
-        maven { url 'https://jitpack.io' }
-    }
-}
-```
-
-* 如果你的 Gradle 配置是 `7.0` 及以上，则需要在 `settings.gradle.kts` 或 `settings.gradle` 文件中加入
-```kotlin
-dependencyResolutionManagement {
-    repositories {
-        // JitPack 远程仓库：https://jitpack.io
         maven("https://jitpack.io")
     }
 }
 ```
 
 ```groovy
-dependencyResolutionManagement {
+// build.gradle
+allprojects {
     repositories {
-        // JitPack 远程仓库：https://jitpack.io
         maven { url 'https://jitpack.io' }
     }
 }
 ```
 
-* 配置完远程仓库后，在项目 app 模块下的 `build.gradle.kts` 或 `build.gradle` 文件中加入远程依赖
-
+* If your Gradle version is `7.0` or higher，add JitPack in your root `settings.gradle.kts` or `settings.gradle` at the end of repositories:
 ```kotlin
-dependencies {
-    // 权限请求框架：https://github.com/getActivity/XXPermissions
-    implementation("com.github.getActivity:XXPermissions:16.8")
-
-    // XXPermissions-ktx https://github.com/Zhao-YinGang/XXPermissions-ktx
-    implementation("com.github.Zhao-YinGang:XXPermissions-ktx:V1.0.0-bate01")
+// build.gradle.kts
+dependencyResolutionManagement {
+    repositories {
+        maven("https://jitpack.io")
+    }
 }
 ```
 
 ```groovy
-dependencies {
-    // 权限请求框架：https://github.com/getActivity/XXPermissions
-    implementation 'com.github.getActivity:XXPermissions:16.8'
+// build.gradle
+dependencyResolutionManagement {
+    repositories {
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+### Add the dependency
+* Add the dependency in your module `build.gradle.kts` or `build.gradle`：
 
-    // XXPermissions-ktx https://github.com/Zhao-YinGang/XXPermissions-ktx
-    implementation 'com.github.Zhao-YinGang:XXPermissions-ktx:V1.0.0-bate01'
+```kotlin
+// build.gradle.kts
+dependencies {
+    implementation("com.github.Zhao-YinGang:XXPermissions-ktx:V1.0.0")
 }
 ```
 
-[XXPermissions-ktx](https://github.com/Zhao-YinGang/XXPermissions-ktx) 只考虑兼容 AndroidX，没有兼容 support。 但是 [XXPermissions](https://github.com/getActivity/XXPermissions) 是 support 库编写的，请在项目 gradle.properties 文件中加入 AndroidX 迁移配置
+```groovy
+// build.gradle
+dependencies {
+    implementation 'com.github.Zhao-YinGang:XXPermissions-ktx:V1.0.0'
+}
 ```
-# 表示将第三方库迁移到 AndroidX
+
+### Migrate to AndroidX
+XXPermissions-ktx is for AndroidX. Add the AndroidX migration configuration in your `gradle.properties`:
+```
+# Migrate third-party libraries to Android X
 android.enableJetifier = true
 ```
-## 用法示例
-* Kotlin 基本用法示例
+
+## Usage
+* Kotlin Basic usage
 ```kotlin
 xxPermissions {
-    // 申请位置权限
+    // add location permissions
     permissions(Permission.ACCESS_FINE_LOCATION, Permission.ACCESS_COARSE_LOCATION)
-    // 授予了权限
+    // Permissions granted
     onGranted { granted ->
-        if (granted.isAllGranted) {  // 用户同意了所有权限
-            toast("所有权限获取成功")
-        } else { // 用户同意了部分权限
-            toast("获取到了以下权限：${permissionsNames(granted.grantedList)}")
+        if (granted.isAllGranted) { // All permissions Granted
+            toast("All permissions Granted")
+        } else { // Some permissions Granted
+            toast("Some permissions Granted：${permissionsNames(granted.grantedList)}")
         }
     }
-    // 拒绝了权限
+    // Permissions Denied
     onDenied { denied ->
-        toast("以下权限被拒绝：${permissionsNames(denied.deniedList)}")
+        toast("Some permissions Denied：${permissionsNames(denied.deniedList)}")
     }
 }
 ```
 
-* Kotlin 完整用法示例
+* Kotlin Complete Usage
 
 ```kotlin
 xxPermissions {
-    // 申请BLE权限
+    // add bluetooth connect permission
     permissions(Permission.BLUETOOTH_CONNECT)
-    // 申请相机权限
+    // add camera permission
     permissions(Permission.CAMERA)
-    // 申请位置权限
+    // add location permissions
     permissions(Permission.ACCESS_FINE_LOCATION, Permission.ACCESS_COARSE_LOCATION)
-    // 如果申请权限之前需要向用户展示权限申请理由，则走此回调
+    // If you should show rationale before requesting permissions, this callback will be called
     onShowRationale { rationale ->
-        // 这里的 Dialog 只是示例，没有用 DialogFragment 来处理 Dialog 生命周期
+        // The dialog here is just an example and does not use DialogFragment to handle the dialog lifecycle
         AlertDialog.Builder(this@requestDemo)
-            .setTitle("权限申请")
-            // 根据 rationalePermissions 进行适当的提示
+            .setTitle("Request Permissions")
+            // Provide appropriate prompts based on rationale parameter
             .setMessage(
-                "应用需要以下权限：" +
+                "The application requires the following permissions: " +
                     permissionsNames(rationale.rationaleList) +
-                    "如果拒绝授予这些权限，则应用部分功能将受限"
+                    "If these permissions are denied, some functions will be restricted."
             )
-            .setNegativeButton("取消") { dialog, _ ->
+            .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
             }
-            .setPositiveButton("去申请") { dialog, _ ->
+            .setPositiveButton("OK") { dialog, _ ->
                 dialog.dismiss()
-                // 用户同意，通过此回调通知框架开始权限申请
+                // User clicked positive button, call onConsent callback to requesting permissions
                 rationale.onConsent()
             }
             .show()
-    } 
-    // 授予了权限
+    }
+    // Permissions granted
     onGranted { granted ->
-        if (granted.isAllGranted) {  // 用户同意了所有权限
-            toast("所有权限获取成功")
-        } else { // 用户同意了部分权限
-            toast("获取到了以下权限：${permissionsNames(granted.grantedList)}")
+        if (granted.isAllGranted) { // All permissions Granted
+            toast("All permissions Granted")
+        } else { // Some permissions Granted
+            toast("Some permissions Granted：${permissionsNames(granted.grantedList)}")
         }
     }
-    // 拒绝了权限
+    // Permissions Denied
     onDenied { denied ->
         if (denied.hasDoNotAskAgain) {
-            // 这里的 Dialog 只是示例，没有用 DialogFragment 来处理 Dialog 生命周期
+            // The dialog here is just an example and does not use DialogFragment to handle the dialog lifecycle
             AlertDialog.Builder(this@requestDemo)
-                .setTitle("权限被永久拒绝")
-                // 根据被拒绝的权限列表进行适当的提示
+                .setTitle("Permissions permanently denied")
+                // Provide appropriate prompts based on denied parameter
                 .setMessage(
-                    "以下权限被永久拒绝：" +
+                    "The following permissions have been permanently denied: " +
                         permissionsNames(denied.doNotAskAgainList) +
-                        "请进入设置界面手动授予权限"
+                        "Please enter the settings screen to grant permissions."
                 )
-                .setNegativeButton("取消") { dialog, _ ->
+                .setNegativeButton("Cancel") { dialog, _ ->
                     dialog.dismiss()
                 }
-                .setPositiveButton("去设置") { dialog, _ ->
+                .setPositiveButton("Enter Settings") { dialog, _ ->
                     dialog.dismiss()
-                    // 用户同意，通过此回调通知框架进入应用设置界面
+                    // User clicked positive button, call onConsent callback to entering settings screen
                     denied.onConsent()
                 }
                 .show()
         } else {
-            toast("以下权限被拒绝：${permissionsNames(denied.deniedList)}")
+            toast("Some permissions Denied：${permissionsNames(denied.deniedList)}")
             requestDemo()
         }
     }
 }
 ```
 
-* Java 完整用法示例
+* Java Complete Usage
 
 ```java
 public class RequestDemo4j {
     public static void run(Activity activity) {
         XXPermissions4j.with(activity)
-            // 申请BLE权限
+            // add bluetooth connect permission
             .permissions(Permission.BLUETOOTH_CONNECT)
-            // 申请相机权限
+            // add camera permission
             .permissions(Permission.CAMERA)
-            // 申请位置权限
+            // add location permissions
             .permissions(Permission.ACCESS_FINE_LOCATION, Permission.ACCESS_COARSE_LOCATION)
-            // 如果申请权限之前需要向用户展示权限申请理由，则走此回调
+            // If you should show rationale before requesting permissions, this callback will be called
             .onShowRationale(rationale -> {
-                // 这里的 Dialog 只是示例，没有用 DialogFragment 来处理 Dialog 生命周期
+                // The dialog here is just an example and does not use DialogFragment to handle the dialog lifecycle
                 new AlertDialog.Builder(activity)
-                    .setTitle("权限申请")
-                    // 根据 rationalePermissions 进行适当的提示
+                    .setTitle("Request Permissions")
+                    // Provide appropriate prompts based on rationale parameter
                     .setMessage(
-                        "应用需要以下权限：" +
+                        "The application requires the following permissions: " +
                             RequestDemoKt.permissionsNames(rationale.getRationaleList()) +
-                            "如果拒绝授予这些权限，则应用部分功能将受限"
+                            "If these permissions are denied, some functions will be restricted."
                     )
-                    .setNeutralButton("取消", (dialog, which) -> dialog.dismiss())
-                    .setPositiveButton("去申请", (dialog, which) -> {
+                    .setNeutralButton("Cancel", (dialog, which) -> dialog.dismiss())
+                    .setPositiveButton("OK", (dialog, which) -> {
                         dialog.dismiss();
-                        // 用户同意，通过此回调通知框架开始权限申请
+                        // User clicked positive button, call onConsent callback to entering settings 
                         rationale.getOnConsent().invoke();
                     })
                     .show();
             })
-            // 授予了权限
+            // Permissions granted
             .onGranted(granted -> {
-                if (granted.isAllGranted()) {  // 用户同意了所有权限
-                    ToastHelper.toast(activity, "所有权限获取成功");
-                } else { // 用户同意了部分权限
-                    ToastHelper.toast(activity, "获取到了以下权限：" + RequestDemoKt.permissionsNames(granted.getGrantedList()));
+                if (granted.isAllGranted()) {  // All permissions Granted
+                    ToastHelper.toast(activity, "All permissions Granted");
+                } else { // Some permissions Granted
+                    ToastHelper.toast(activity, "Some permissions Granted：" + RequestDemoKt.permissionsNames(granted.getGrantedList()));
                 }
             })
-            // 拒绝了权限
+            // Permissions Denied
             .onDenied(denied -> {
                 if (denied.getHasDoNotAskAgain()) {
-                    // 这里的 Dialog 只是示例，没有用 DialogFragment 来处理 Dialog 生命周期
+                    // The dialog here is just an example and does not use DialogFragment to handle the dialog lifecycle
                     new AlertDialog.Builder(activity)
-                        .setTitle("权限被永久拒绝")
-                        // 根据被拒绝的权限列表进行适当的提示
+                        .setTitle("Permissions permanently denied")
+                        // Provide appropriate prompts based on denied parameter
                         .setMessage(
-                            "以下权限被永久拒绝：" +
+                            "The following permissions have been permanently denied: " +
                                 RequestDemoKt.permissionsNames(denied.getDoNotAskAgainList()) +
-                                "请进入设置界面手动授予权限"
+                                "Please enter the settings screen to grant permissions."
                         )
-                        .setNeutralButton("取消", (dialog, which) -> dialog.dismiss())
-                        .setPositiveButton("去申请", (dialog, which) -> {
+                        .setNeutralButton("Cancel", (dialog, which) -> dialog.dismiss())
+                        .setPositiveButton("Enter Settings", (dialog, which) -> {
                             dialog.dismiss();
-                            // 用户同意，通过此回调通知框架进入应用设置界面
+                            // User clicked positive button, call onConsent callback to entering settings screen
                             denied.getOnConsent().invoke();
                         })
                         .show();
@@ -220,10 +249,28 @@ public class RequestDemo4j {
                     run(activity);
                 }
             })
+            // request permissions
             .request();
     }
 }
 ```
 
+## Example
+To learn how to use XXPermissions-ktx, please refer to [demo](app)。
 
-* 更多关于 XXPermissions 的用法，请参考 [XXPermissions](https://github.com/getActivity/XXPermissions)
+## Related Efforts
+- [XXPermissions](https://github.com/getActivity/XXPermissions) - Android permission request framework, adapted to Android 13
+
+## Maintainers
+
+[@Zhao-YinGang](https://github.com/Zhao-YinGang)。
+
+## Contributing
+Feel free to dive in! [Open an issue](https://github.com/RichardLitt/standard-readme/issues/new) or submit PRs.
+
+XXPermissions-ktx follows the [Contributor Covenant](http://contributor-covenant.org/version/1/3/0/) Code of Conduct.
+
+## License
+
+[Apache-2.0](LICENSE) © Zhao-YinGang
+
