@@ -15,16 +15,14 @@
  *
  */
 
-package com.zhaoyingang.permission.internal
+package com.zhaoyingang.permission
 
-import com.zhaoyingang.permission.DeniedPermissions
-import com.zhaoyingang.permission.OnConsentCallback
-
-internal class DeniedPermissionsImpl(
-    override val deniedList: List<String>,
-    override val doNotAskAgainList: List<String>,
-    override val onConsent: OnConsentCallback
-) : DeniedPermissions {
-    override val askAgainList: List<String> = deniedList - doNotAskAgainList.toSet()
-    override val hasDoNotAskAgain: Boolean get() = doNotAskAgainList.isNotEmpty()
+fun interface OnPermissionsDoNotAskAgain {
+    /**
+     * Called when you should tell user to allow these permissions in settings.
+     *
+     * @param doNotAskAgainList Permissions that should allow in settings.
+     * @param onUserResult Call it when the user agrees or refuses to allow these permissions in settings.
+     */
+    fun onDoNotAskAgain(doNotAskAgainList: List<String>, onUserResult: OnUserResultCallback)
 }

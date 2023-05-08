@@ -23,31 +23,24 @@ import android.app.Activity
 import android.app.Fragment
 
 inline fun Activity.xxPermissions(block: XXPermissionsDSL.() -> Unit) =
-    XXPermissionsDSL(XXPermissions4j.with(this)).apply { block(this) }.xxPermissions.request()
+    XXPermissionsDSL(XXPermissionsExt.with(this)).apply { block(this) }.xxPermissions.request()
 
 inline fun androidx.fragment.app.Fragment.xxPermissions(block: XXPermissionsDSL.() -> Unit) =
-    XXPermissionsDSL(XXPermissions4j.with(this)).apply { block(this) }.xxPermissions.request()
+    XXPermissionsDSL(XXPermissionsExt.with(this)).apply { block(this) }.xxPermissions.request()
 
 inline fun Fragment.xxPermissions(block: XXPermissionsDSL.() -> Unit) =
-    XXPermissionsDSL(XXPermissions4j.with(this)).apply { block(this) }.xxPermissions.request()
+    XXPermissionsDSL(XXPermissionsExt.with(this)).apply { block(this) }.xxPermissions.request()
 
-class XXPermissionsDSL(@PublishedApi internal val xxPermissions: XXPermissions4j) {
+class XXPermissionsDSL(@PublishedApi internal val xxPermissions: XXPermissionsExt) {
     /**
-     * 添加权限
-     */
-    fun permission(permission: String) {
-        xxPermissions.permission(permission)
-    }
-
-    /**
-     * 添加多个权限
+     * add permissions
      */
     fun permissions(vararg permissions: String) {
         xxPermissions.permissions(permissions)
     }
 
     /**
-     * 添加多个权限
+     * add permissions
      */
     @JvmName("permissionsArray")
     fun permissions(permissions: Array<out String>) {
@@ -55,30 +48,31 @@ class XXPermissionsDSL(@PublishedApi internal val xxPermissions: XXPermissions4j
     }
 
     /**
-     * 添加多个权限
+     * add permissions
      */
     fun permissions(permissions: List<String>) {
         xxPermissions.permissions(permissions)
     }
 
     /**
-     * 需要展示申请原因时回调
+     * Called when you should tell user to allow these permissions in settings.
      */
-    fun onShowRationale(onShowRationale: OnShowRequestPermissionRationale) {
-        xxPermissions.onShowRationale(onShowRationale)
+    fun onDoNotAskAgain(onDoNotAskAgain: OnPermissionsDoNotAskAgain) {
+        xxPermissions.onDoNotAskAgain(onDoNotAskAgain)
     }
 
     /**
-     * 有权限被拒绝授予时回调
+     * Called when you should show request permission rationale.
      */
-    fun onDenied(onDenied: OnPermissionsDenied) {
-        xxPermissions.onDenied(onDenied)
+    fun onShouldShowRationale(onShouldShowRationale: OnPermissionsShouldShowRationale) {
+
+        xxPermissions.onShouldShowRationale(onShouldShowRationale)
     }
 
     /**
-     * 有权限被同意授予时回调
+     * Callback for the permissions request result.
      */
-    fun onGranted(onDenied: OnPermissionsGranted) {
-        xxPermissions.onGranted(onDenied)
+    fun onResult(onResult: OnPermissionResult) {
+        xxPermissions.onResult(onResult)
     }
 }

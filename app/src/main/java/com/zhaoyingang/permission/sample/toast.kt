@@ -20,8 +20,10 @@
 package com.zhaoyingang.permission.sample
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 
 fun Context.toast(text: String) {
+    Log.i("toast", text)
     Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
 }

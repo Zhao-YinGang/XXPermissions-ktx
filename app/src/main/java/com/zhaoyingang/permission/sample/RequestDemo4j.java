@@ -21,71 +21,70 @@ import android.app.Activity;
 import androidx.appcompat.app.AlertDialog;
 
 import com.hjq.permissions.Permission;
-import com.zhaoyingang.permission.XXPermissions4j;
+import com.zhaoyingang.permission.XXPermissionsExt;
 
 /**
  * Java 权限申请示例
  */
 public class RequestDemo4j {
     public static void run(Activity activity) {
-        XXPermissions4j.with(activity)
-            // 申请BLE权限
-            .permissions(Permission.BLUETOOTH_CONNECT)
-            // 申请相机权限
-            .permissions(Permission.CAMERA)
+        XXPermissionsExt.with(activity)
             // 申请位置权限
             .permissions(Permission.ACCESS_FINE_LOCATION, Permission.ACCESS_COARSE_LOCATION)
+            // 申请相机权限
+            .permissions(Permission.CAMERA)
+            // 申请BLE权限
+            .permissions(Permission.BLUETOOTH_CONNECT)
             // 如果申请权限之前需要向用户展示权限申请理由，则走此回调
-            .onShowRationale(rationale -> {
+            .onShouldShowRationale((shouldShowRationaleList, onUserResult) -> {
                 // 这里的 Dialog 只是示例，没有用 DialogFragment 来处理 Dialog 生命周期
                 new AlertDialog.Builder(activity)
                     .setTitle("权限申请")
                     // 根据 rationalePermissions 进行适当的提示
                     .setMessage(
                         "应用需要以下权限：" +
-                            RequestDemoKt.permissionsNames(rationale.getRationaleList()) +
+                            RequestDemoKt.permissionsNames(shouldShowRationaleList) +
                             "如果拒绝授予这些权限，则应用部分功能将受限"
                     )
-                    .setNeutralButton("取消", (dialog, which) -> dialog.dismiss())
+                    .setNegativeButton("取消", (dialog, which) -> dialog.cancel())
                     .setPositiveButton("去申请", (dialog, which) -> {
                         dialog.dismiss();
-                        // 用户同意，通过此回调通知框架开始权限申请
-                        rationale.getOnConsent().invoke();
+                        // 用户同意，通过此回调通知框架
+                        onUserResult.onResult(true);
+                    })
+                    .setOnCancelListener(dialog -> {
+                        // 用户不同意，通过此回调通知框架
+                        onUserResult.onResult(false);
                     })
                     .show();
             })
-            // 授予了权限
-            .onGranted(granted -> {
-                if (granted.isAllGranted()) {  // 用户同意了所有权限
-                    ToastHelper.toast(activity, "所有权限获取成功");
-                } else { // 用户同意了部分权限
-                    ToastHelper.toast(activity, "获取到了以下权限：" + RequestDemoKt.permissionsNames(granted.getGrantedList()));
-                }
+            .onDoNotAskAgain((doNotAskAgainList, onUserResult) -> {
+                // 这里的 Dialog 只是示例，没有用 DialogFragment 来处理 Dialog 生命周期
+                new AlertDialog.Builder(activity)
+                    .setTitle("权限被永久拒绝")
+                    // 根据被拒绝的权限列表进行适当的提示
+                    .setMessage(
+                        "以下权限被永久拒绝：" +
+                            RequestDemoKt.permissionsNames(doNotAskAgainList) +
+                            "请进入设置界面手动授予权限"
+                    )
+                    .setNegativeButton("取消", (dialog, which) -> dialog.cancel())
+                    .setPositiveButton("去设置", (dialog, which) -> {
+                        dialog.dismiss();
+                        // 用户同意，通过此回调通知框架
+                        onUserResult.onResult(true);
+                    })
+                    .setOnCancelListener(dialog -> {
+                        // 用户不同意，通过此回调通知框架
+                        onUserResult.onResult(false);
+                    })
+                    .show();
             })
-            // 拒绝了权限
-            .onDenied(denied -> {
-                if (denied.getHasDoNotAskAgain()) {
-                    // 这里的 Dialog 只是示例，没有用 DialogFragment 来处理 Dialog 生命周期
-                    new AlertDialog.Builder(activity)
-                        .setTitle("权限被永久拒绝")
-                        // 根据被拒绝的权限列表进行适当的提示
-                        .setMessage(
-                            "以下权限被永久拒绝：" +
-                                RequestDemoKt.permissionsNames(denied.getDoNotAskAgainList()) +
-                                "请进入设置界面手动授予权限"
-                        )
-                        .setNeutralButton("取消", (dialog, which) -> dialog.dismiss())
-                        .setPositiveButton("去申请", (dialog, which) -> {
-                            dialog.dismiss();
-                            // 用户同意，通过此回调通知框架进入应用设置界面
-                            denied.getOnConsent().invoke();
-                        })
-                        .show();
-                } else {
-                    ToastHelper.toast(activity, "以下权限被拒绝：" + RequestDemoKt.permissionsNames(denied.getDeniedList()));
-                    run(activity);
-                }
-            })
+            .onResult((allGranted, grantedList, deniedList) -> ToastHelper.toast(activity,
+                "allGranted: " + allGranted +
+                    "\ngrantedList: " + grantedList +
+                    "\ndeniedList: " + deniedList
+            ))
             .request();
     }
 }

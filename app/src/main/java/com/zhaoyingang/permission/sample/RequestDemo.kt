@@ -29,17 +29,13 @@ fun Activity.requestBasicDemo() {
     xxPermissions {
         // 申请位置权限
         permissions(Permission.ACCESS_FINE_LOCATION, Permission.ACCESS_COARSE_LOCATION)
-        // 授予了权限
-        onGranted { granted ->
-            if (granted.isAllGranted) {  // 用户同意了所有权限
-                toast("所有权限获取成功")
-            } else { // 用户同意了部分权限
-                toast("获取到了以下权限：${permissionsNames(granted.grantedList)}")
-            }
-        }
-        // 拒绝了权限
-        onDenied { denied ->
-            toast("以下权限被拒绝：${permissionsNames(denied.deniedList)}")
+        // 权限申请结果
+        onResult { allGranted, grantedList, deniedList ->
+            toast(
+                "allGranted: " + allGranted +
+                    "\ngrantedList: " + grantedList +
+                    "\ndeniedList: " + deniedList
+            )
         }
     }
 }
@@ -56,59 +52,63 @@ fun Activity.requestDemo() {
         // 申请位置权限
         permissions(Permission.ACCESS_FINE_LOCATION, Permission.ACCESS_COARSE_LOCATION)
         // 如果申请权限之前需要向用户展示权限申请理由，则走此回调
-        onShowRationale { rationale ->
+        onShouldShowRationale { shouldShowRationaleList, onUserResult ->
             // 这里的 Dialog 只是示例，没有用 DialogFragment 来处理 Dialog 生命周期
             AlertDialog.Builder(this@requestDemo)
                 .setTitle("权限申请")
                 // 根据 rationalePermissions 进行适当的提示
                 .setMessage(
                     "应用需要以下权限：" +
-                        permissionsNames(rationale.rationaleList) +
+                        permissionsNames(shouldShowRationaleList) +
                         "如果拒绝授予这些权限，则应用部分功能将受限"
                 )
                 .setNegativeButton("取消") { dialog, _ ->
-                    dialog.dismiss()
+                    dialog.cancel()
                 }
                 .setPositiveButton("去申请") { dialog, _ ->
                     dialog.dismiss()
                     // 用户同意，通过此回调通知框架开始权限申请
-                    rationale.onConsent()
+                    onUserResult.onResult(true)
+                }
+                .setOnCancelListener {
+                    // 用户不同意，通过此回调通知框架
+                    onUserResult.onResult(false)
                 }
                 .show()
         }
-        // 授予了权限
-        onGranted { granted ->
-            if (granted.isAllGranted) {  // 用户同意了所有权限
-                toast("所有权限获取成功")
-            } else { // 用户同意了部分权限
-                toast("获取到了以下权限：${permissionsNames(granted.grantedList)}")
-            }
+
+        onDoNotAskAgain { doNotAskAgainList, onUserResult ->
+            // 这里的 Dialog 只是示例，没有用 DialogFragment 来处理 Dialog 生命周期
+            AlertDialog.Builder(this@requestDemo)
+                .setTitle("权限被永久拒绝")
+                // 根据被拒绝的权限列表进行适当的提示
+                .setMessage(
+                    "以下权限被永久拒绝：" +
+                        permissionsNames(doNotAskAgainList) +
+                        "请进入设置界面手动授予权限"
+                )
+                .setNegativeButton("取消") { dialog, _ ->
+                    dialog.cancel()
+                }
+                .setPositiveButton("去设置") { dialog, _ ->
+                    dialog.dismiss()
+                    // 用户同意，通过此回调通知框架进入应用设置界面
+                    onUserResult.onResult(false)
+                }
+                .setOnCancelListener {
+                    // 用户不同意，通过此回调通知框架
+                    onUserResult.onResult(false)
+
+                }
+                .show()
         }
-        // 拒绝了权限
-        onDenied { denied ->
-            if (denied.hasDoNotAskAgain) {
-                // 这里的 Dialog 只是示例，没有用 DialogFragment 来处理 Dialog 生命周期
-                AlertDialog.Builder(this@requestDemo)
-                    .setTitle("权限被永久拒绝")
-                    // 根据被拒绝的权限列表进行适当的提示
-                    .setMessage(
-                        "以下权限被永久拒绝：" +
-                           permissionsNames(denied.doNotAskAgainList) +
-                            "请进入设置界面手动授予权限"
-                    )
-                    .setNegativeButton("取消") { dialog, _ ->
-                        dialog.dismiss()
-                    }
-                    .setPositiveButton("去设置") { dialog, _ ->
-                        dialog.dismiss()
-                        // 用户同意，通过此回调通知框架进入应用设置界面
-                        denied.onConsent()
-                    }
-                    .show()
-            } else {
-                toast("以下权限被拒绝：${permissionsNames(denied.deniedList)}")
-                requestDemo()
-            }
+        // 权限申请结果
+        onResult { allGranted, grantedList, deniedList ->
+            toast(
+                "allGranted: " + allGranted +
+                    "\ngrantedList: " + grantedList +
+                    "\ndeniedList: " + deniedList
+            )
         }
     }
 }
