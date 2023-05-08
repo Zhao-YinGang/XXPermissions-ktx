@@ -79,14 +79,14 @@ dependencyResolutionManagement {
 ```kotlin
 // build.gradle.kts
 dependencies {
-    implementation("com.github.Zhao-YinGang:XXPermissions-ktx:V1.0.0")
+    implementation("com.github.Zhao-YinGang:XXPermissions-ktx:V1.1.0")
 }
 ```
 
 ```groovy
 // build.gradle
 dependencies {
-    implementation 'com.github.Zhao-YinGang:XXPermissions-ktx:V1.0.0'
+    implementation 'com.github.Zhao-YinGang:XXPermissions-ktx:V1.1.0'
 }
 ```
 
@@ -103,17 +103,13 @@ android.enableJetifier = true
 xxPermissions {
     // add location permissions
     permissions(Permission.ACCESS_FINE_LOCATION, Permission.ACCESS_COARSE_LOCATION)
-    // Permissions granted
-    onGranted { granted ->
-        if (granted.isAllGranted) { // All permissions Granted
-            toast("All permissions Granted")
-        } else { // Some permissions Granted
-            toast("Some permissions Granted：${permissionsNames(granted.grantedList)}")
-        }
-    }
-    // Permissions Denied
-    onDenied { denied ->
-        toast("Some permissions Denied：${permissionsNames(denied.deniedList)}")
+    // request result
+    onResult { allGranted, grantedList, deniedList ->
+        toast(
+            "allGranted: " + allGranted +
+                "\ngrantedList: " + grantedList +
+                "\ndeniedList: " + deniedList
+        )
     }
 }
 ```
@@ -129,59 +125,60 @@ xxPermissions {
     // add location permissions
     permissions(Permission.ACCESS_FINE_LOCATION, Permission.ACCESS_COARSE_LOCATION)
     // If you should show rationale before requesting permissions, this callback will be called
-    onShowRationale { rationale ->
+    onShouldShowRationale { shouldShowRationaleList, onUserResult ->
         // The dialog here is just an example and does not use DialogFragment to handle the dialog lifecycle
         AlertDialog.Builder(this@requestDemo)
             .setTitle("Request Permissions")
             // Provide appropriate prompts based on rationale parameter
             .setMessage(
                 "The application requires the following permissions: " +
-                    permissionsNames(rationale.rationaleList) +
+                    permissionsNames(shouldShowRationaleList) +
                     "If these permissions are denied, some functions will be restricted."
             )
             .setNegativeButton("Cancel") { dialog, _ ->
-                dialog.dismiss()
+                dialog.cancel()
             }
             .setPositiveButton("OK") { dialog, _ ->
                 dialog.dismiss()
                 // User clicked positive button, call onConsent callback to requesting permissions
-                rationale.onConsent()
+                onUserResult.onResult(true)
+            }
+            .setOnCancelListener {
+                onUserResult.onResult(false)
             }
             .show()
     }
-    // Permissions granted
-    onGranted { granted ->
-        if (granted.isAllGranted) { // All permissions Granted
-            toast("All permissions Granted")
-        } else { // Some permissions Granted
-            toast("Some permissions Granted：${permissionsNames(granted.grantedList)}")
-        }
+    // permissions denied permanently
+    onDoNotAskAgain { doNotAskAgainList, onUserResult ->
+        // The dialog here is just an example and does not use DialogFragment to handle the dialog lifecycle
+        AlertDialog.Builder(this@requestDemo)
+            .setTitle("Permissions permanently denied")
+            // Provide appropriate prompts based on denied parameter
+            .setMessage(
+                "The following permissions have been permanently denied: " +
+                    permissionsNames(denied.doNotAskAgainList) +
+                    "Please enter the settings screen to grant permissions."
+            )
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.cancel()
+            }
+            .setPositiveButton("Enter Settings") { dialog, _ ->
+                dialog.dismiss()
+                // User clicked positive button, call onConsent callback to entering settings screen
+                onUserResult.onResult(false)
+            }
+            .setOnCancelListener {
+                onUserResult.onResult(false)
+            }
+            .show()
     }
-    // Permissions Denied
-    onDenied { denied ->
-        if (denied.hasDoNotAskAgain) {
-            // The dialog here is just an example and does not use DialogFragment to handle the dialog lifecycle
-            AlertDialog.Builder(this@requestDemo)
-                .setTitle("Permissions permanently denied")
-                // Provide appropriate prompts based on denied parameter
-                .setMessage(
-                    "The following permissions have been permanently denied: " +
-                        permissionsNames(denied.doNotAskAgainList) +
-                        "Please enter the settings screen to grant permissions."
-                )
-                .setNegativeButton("Cancel") { dialog, _ ->
-                    dialog.dismiss()
-                }
-                .setPositiveButton("Enter Settings") { dialog, _ ->
-                    dialog.dismiss()
-                    // User clicked positive button, call onConsent callback to entering settings screen
-                    denied.onConsent()
-                }
-                .show()
-        } else {
-            toast("Some permissions Denied：${permissionsNames(denied.deniedList)}")
-            requestDemo()
-        }
+    // request result
+    onResult { allGranted, grantedList, deniedList ->
+        toast(
+            "allGranted: " + allGranted +
+                "\ngrantedList: " + grantedList +
+                "\ndeniedList: " + deniedList
+        )
     }
 }
 ```
@@ -199,7 +196,7 @@ public class RequestDemo4j {
             // add location permissions
             .permissions(Permission.ACCESS_FINE_LOCATION, Permission.ACCESS_COARSE_LOCATION)
             // If you should show rationale before requesting permissions, this callback will be called
-            .onShowRationale(rationale -> {
+            .onShouldShowRationale((shouldShowRationaleList, onUserResult) -> {
                 // The dialog here is just an example and does not use DialogFragment to handle the dialog lifecycle
                 new AlertDialog.Builder(activity)
                     .setTitle("Request Permissions")
@@ -209,46 +206,40 @@ public class RequestDemo4j {
                             RequestDemoKt.permissionsNames(rationale.getRationaleList()) +
                             "If these permissions are denied, some functions will be restricted."
                     )
-                    .setNeutralButton("Cancel", (dialog, which) -> dialog.dismiss())
+                    .setNegativeButton("Cancel", (dialog, which) -> dialog.cancel())
                     .setPositiveButton("OK", (dialog, which) -> {
                         dialog.dismiss();
-                        // User clicked positive button, call onConsent callback to entering settings 
-                        rationale.getOnConsent().invoke();
+                        // User clicked positive button, call onConsent callback to requesting permissions
+                        onUserResult.onResult(true);
                     })
+                    .setOnCancelListener(dialog -> onUserResult.onResult(false))
                     .show();
             })
-            // Permissions granted
-            .onGranted(granted -> {
-                if (granted.isAllGranted()) {  // All permissions Granted
-                    ToastHelper.toast(activity, "All permissions Granted");
-                } else { // Some permissions Granted
-                    ToastHelper.toast(activity, "Some permissions Granted：" + RequestDemoKt.permissionsNames(granted.getGrantedList()));
-                }
+            .onDoNotAskAgain((doNotAskAgainList, onUserResult) -> {
+                // The dialog here is just an example and does not use DialogFragment to handle the dialog lifecycle
+                new AlertDialog.Builder(activity)
+                    .setTitle("Permissions permanently denied")
+                    // Provide appropriate prompts based on denied parameter
+                    .setMessage(
+                        "The following permissions have been permanently denied: " +
+                            RequestDemoKt.permissionsNames(denied.getDoNotAskAgainList()) +
+                            "Please enter the settings screen to grant permissions."
+                    )
+                    .setNegativeButton("Cancel", (dialog, which) -> dialog.cancel())
+                    .setPositiveButton("OK", (dialog, which) -> {
+                        dialog.dismiss();
+                        // User clicked positive button, call onConsent callback to entering settings screen
+                        onUserResult.onResult(true);
+                    })
+                    .setOnCancelListener(dialog -> onUserResult.onResult(false))
+                    .show();
             })
-            // Permissions Denied
-            .onDenied(denied -> {
-                if (denied.getHasDoNotAskAgain()) {
-                    // The dialog here is just an example and does not use DialogFragment to handle the dialog lifecycle
-                    new AlertDialog.Builder(activity)
-                        .setTitle("Permissions permanently denied")
-                        // Provide appropriate prompts based on denied parameter
-                        .setMessage(
-                            "The following permissions have been permanently denied: " +
-                                RequestDemoKt.permissionsNames(denied.getDoNotAskAgainList()) +
-                                "Please enter the settings screen to grant permissions."
-                        )
-                        .setNeutralButton("Cancel", (dialog, which) -> dialog.dismiss())
-                        .setPositiveButton("Enter Settings", (dialog, which) -> {
-                            dialog.dismiss();
-                            // User clicked positive button, call onConsent callback to entering settings screen
-                            denied.getOnConsent().invoke();
-                        })
-                        .show();
-                } else {
-                    ToastHelper.toast(activity, "以下权限被拒绝：" + RequestDemoKt.permissionsNames(denied.getDeniedList()));
-                    run(activity);
-                }
-            })
+            // request result
+            .onResult((allGranted, grantedList, deniedList) -> ToastHelper.toast(activity,
+                "allGranted: " + allGranted +
+                    "\ngrantedList: " + grantedList +
+                    "\ndeniedList: " + deniedList
+            ))
             // request permissions
             .request();
     }
