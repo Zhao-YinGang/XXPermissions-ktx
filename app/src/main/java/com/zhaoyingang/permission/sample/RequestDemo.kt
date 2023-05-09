@@ -93,7 +93,7 @@ fun Activity.requestDemo() {
                 .setPositiveButton("去设置") { dialog, _ ->
                     dialog.dismiss()
                     // 用户同意，通过此回调通知框架进入应用设置界面
-                    onUserResult.onResult(false)
+                    onUserResult.onResult(true)
                 }
                 .setOnCancelListener {
                     // 用户不同意，通过此回调通知框架

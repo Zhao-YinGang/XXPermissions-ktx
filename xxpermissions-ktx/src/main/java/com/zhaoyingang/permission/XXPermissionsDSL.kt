@@ -65,7 +65,6 @@ class XXPermissionsDSL(@PublishedApi internal val xxPermissions: XXPermissionsEx
      * Called when you should show request permission rationale.
      */
     fun onShouldShowRationale(onShouldShowRationale: OnPermissionsShouldShowRationale) {
-
         xxPermissions.onShouldShowRationale(onShouldShowRationale)
     }
 

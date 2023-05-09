@@ -165,7 +165,7 @@ xxPermissions {
             .setPositiveButton("Enter Settings") { dialog, _ ->
                 dialog.dismiss()
                 // User clicked positive button, call onConsent callback to entering settings screen
-                onUserResult.onResult(false)
+                onUserResult.onResult(true)
             }
             .setOnCancelListener {
                 onUserResult.onResult(false)

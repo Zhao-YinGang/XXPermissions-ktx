@@ -103,70 +103,76 @@ class XXPermissionsExt private constructor(private val activity: Activity) {
      * 发起权限请求
      */
     fun request() {
-        return XXPermissions.with(activity).permission(permissionList).interceptor(object : IPermissionInterceptor {
-                override fun launchPermissionRequest(activity: Activity, allList: List<String>, callback: OnPermissionCallback?) {
-                    val showRationale = onShouldShowRationale ?: return super.launchPermissionRequest(activity, allList, callback)
-                    val rationalePermissions = allList.filter { ActivityCompat.shouldShowRequestPermissionRationale(activity, it) }
-                    if (rationalePermissions.isEmpty()) return super.launchPermissionRequest(activity, allList, callback)
+        return XXPermissions.with(activity)
+            .permission(permissionList)
+            .interceptor(
+                object : IPermissionInterceptor {
+                    override fun launchPermissionRequest(activity: Activity, allList: List<String>, callback: OnPermissionCallback?) {
+                        val showRationale = onShouldShowRationale ?: return super.launchPermissionRequest(activity, allList, callback)
+                        val rationalePermissions = allList.filter { ActivityCompat.shouldShowRequestPermissionRationale(activity, it) }
+                        if (rationalePermissions.isEmpty()) return super.launchPermissionRequest(activity, allList, callback)
 
-                    showRationale.onShouldShowRationale(rationalePermissions) { isAgree ->
-                        if (isAgree) {
-                            super.launchPermissionRequest(activity, allList, callback)
+                        showRationale.onShouldShowRationale(rationalePermissions) { isAgree ->
+                            if (isAgree) {
+                                super.launchPermissionRequest(activity, allList, callback)
+                            } else {
+                                val newDenied = XXPermissions.getDenied(activity, allList)
+                                callback?.onGranted(allList - newDenied.toSet(), false)
+                                callback?.onDenied(newDenied, false)
+                            }
+                        }
+                    }
+
+                    override fun deniedPermissionRequest(
+                        activity: Activity, allList: List<String>, deniedList: List<String>, doNotAskAgain: Boolean, callback: OnPermissionCallback?
+                    ) {
+                        if (doNotAskAgain) {
+                            showPermissionSettingDialog(activity, allList, deniedList, callback)
                         } else {
-                            val deniedList = XXPermissions.getDenied(activity, allList)
+                            val newDenied = XXPermissions.getDenied(activity, allList)
+                            callback?.onGranted(allList - newDenied.toSet(), false)
                             callback?.onDenied(deniedList, false)
                         }
                     }
-                }
 
-                override fun deniedPermissionRequest(
-                    activity: Activity, allList: List<String>, deniedList: List<String>, doNotAskAgain: Boolean, callback: OnPermissionCallback?
-                ) {
-                    if (doNotAskAgain) {
-                        showPermissionSettingDialog(activity, allList, deniedList, callback)
-                    } else {
-                        callback?.onDenied(deniedList, false)
-                    }
-                }
+                    private fun showPermissionSettingDialog(
+                        activity: Activity, allList: List<String>, deniedList: List<String>, callback: OnPermissionCallback?
+                    ) {
+                        val onDoNotAskAgain = onDoNotAskAgain ?: return super.deniedPermissionRequest(activity, allList, deniedList, true, callback)
+                        val doNotAskAgainList = deniedList.filter { XXPermissions.isPermanentDenied(activity, it) }
+                        onDoNotAskAgain.onDoNotAskAgain(doNotAskAgainList) { isAgree ->
+                            if (isAgree) {
+                                XXPermissions.startPermissionActivity(activity, doNotAskAgainList, object : OnPermissionPageCallback {
+                                    override fun onGranted() {
+                                        callback?.onGranted(allList, true)
+                                    }
 
-                private fun showPermissionSettingDialog(
-                    activity: Activity, allList: List<String>, deniedList: List<String>, callback: OnPermissionCallback?
-                ) {
-                    val onDoNotAskAgain = onDoNotAskAgain ?: return super.deniedPermissionRequest(activity, allList, deniedList, true, callback)
-                    val doNotAskAgainList = deniedList.filter { XXPermissions.isPermanentDenied(activity, it) }
-                    onDoNotAskAgain.onDoNotAskAgain(doNotAskAgainList) { isAgree ->
-                        if (isAgree) {
-                            XXPermissions.startPermissionActivity(activity, doNotAskAgainList, object : OnPermissionPageCallback {
-                                override fun onGranted() {
-                                    callback?.onGranted(allList, true)
-                                }
-
-                                override fun onDenied() {
-                                    request()
-                                }
-                            })
-                        } else {
-                            callback?.onDenied(deniedList, true)
+                                    override fun onDenied() {
+                                        val newDenied = XXPermissions.getDenied(activity, allList)
+                                        callback?.onGranted(allList - newDenied.toSet(), false)
+                                        callback?.onDenied(newDenied, true)
+                                    }
+                                })
+                            } else {
+                                val newDenied = XXPermissions.getDenied(activity, allList)
+                                callback?.onGranted(allList - newDenied.toSet(), false)
+                                callback?.onDenied(deniedList, true)
+                            }
                         }
                     }
-                }
-            }).request(object : OnPermissionCallback {
-                private var deniedList: List<String>? = null
+                })
+            .request(object : OnPermissionCallback {
                 private var grantedList: List<String>? = null
                 override fun onGranted(permissions: List<String>, allGranted: Boolean) {
-                    if (allGranted || deniedList != null) {
-                        onResult?.onResult(allGranted, permissions, deniedList.orEmpty())
+                    if (allGranted) {
+                        onResult?.onResult(true, permissions, emptyList())
                     } else {
                         grantedList = permissions
                     }
                 }
 
                 override fun onDenied(permissions: List<String>, doNotAskAgain: Boolean) {
-                    if (grantedList != null) {
-                        onResult?.onResult(false, grantedList.orEmpty(), permissions)
-                    } else {
-                        deniedList = permissions
-                    }
+                    onResult?.onResult(false, grantedList.orEmpty(), permissions)
                 }
             })
     }
