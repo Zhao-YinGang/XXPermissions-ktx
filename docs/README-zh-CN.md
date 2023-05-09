@@ -85,14 +85,14 @@ dependencyResolutionManagement {
 ```kotlin
 // build.gradle.kts
 dependencies {
-    implementation("com.github.Zhao-YinGang:XXPermissions-ktx:V1.0.0")
+    implementation("com.github.Zhao-YinGang:XXPermissions-ktx:V1.5.0")
 }
 ```
 
 ```groovy
 // build.gradle
 dependencies {
-    implementation 'com.github.Zhao-YinGang:XXPermissions-ktx:V1.0.0'
+    implementation 'com.github.Zhao-YinGang:XXPermissions-ktx:V1.5.0'
 }
 ```
 
