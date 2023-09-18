@@ -107,9 +107,16 @@ class XXPermissionsExt private constructor(private val activity: Activity) {
             .permission(permissionList)
             .interceptor(
                 object : IPermissionInterceptor {
+                    @Suppress("TooGenericExceptionCaught", "SwallowedException")
                     override fun launchPermissionRequest(activity: Activity, allList: List<String>, callback: OnPermissionCallback?) {
                         val showRationale = onShouldShowRationale ?: return super.launchPermissionRequest(activity, allList, callback)
-                        val rationalePermissions = allList.filter { ActivityCompat.shouldShowRequestPermissionRationale(activity, it) }
+                        val rationalePermissions = allList.filter {
+                            try {
+                                ActivityCompat.shouldShowRequestPermissionRationale(activity, it)
+                            } catch (e: Exception) {
+                                false
+                            }
+                        }
                         if (rationalePermissions.isEmpty()) return super.launchPermissionRequest(activity, allList, callback)
 
                         showRationale.onShouldShowRationale(rationalePermissions) { isAgree ->

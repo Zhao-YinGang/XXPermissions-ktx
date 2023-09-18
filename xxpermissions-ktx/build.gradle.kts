@@ -56,11 +56,12 @@ publishing {
 
 dependencies {
     // 权限请求框架：https://github.com/getActivity/XXPermissions
-    api("com.github.getActivity:XXPermissions:16.8")
+    api("com.github.getActivity:XXPermissions:18.3")
 
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.20")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.22")
     implementation("androidx.core:core-ktx:1.10.0")
-    implementation("androidx.annotation:annotation:1.6.0")
-    implementation("androidx.fragment:fragment-ktx:1.5.7")
-    implementation("androidx.activity:activity-ktx:1.7.1")
+    implementation("androidx.annotation:annotation:1.7.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.fragment:fragment-ktx:1.6.1")
+    implementation("androidx.activity:activity-ktx:1.7.2")
 }
